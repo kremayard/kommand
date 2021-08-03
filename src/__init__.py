@@ -1,13 +1,15 @@
 from dataclasses import dataclass
 from typing import Callable
 
+
 @dataclass
 class Kommand:
     """Base class for Kommand.
-    
+
     Args:
         prefix (str): Prefixes for commands.
     """
+
     def __init__(self, prefix: str) -> None:
         self.prefix = prefix
         self.__commands: list = []
@@ -29,7 +31,7 @@ class Kommand:
                 kwargs["guild_only"] = guild_only
 
                 self.__commands.append(
-                    (fn_name, guild_only, kwargs, fn)
+                    (kwargs, fn)
                 )
 
                 return self.__commands
@@ -40,14 +42,46 @@ class Kommand:
 
     def get(self, fn: Callable):
         """Get a command with command metadatas.
-        
+
         Args:
             fn (Callable): a function that containes one parameter (metadata). This function must return a bool.
 
         Returns:
-            dict: All informations for command that includes name, guild_only and other metadatas.
+            tuple: A tuple that contains bot metadata and command function.
         """
 
         for command in self.__commands:
-            if fn(command[2]) == True:
-                return command[2]
+            if fn(command[0]) == True:
+                return command
+
+        return (None, None)
+
+    def prepare(self, client):
+        """Prepare commands for Krema client.
+
+        Args:
+            client (krema.models.Client): Client.
+        """
+
+        async def wrapper(message):
+            content_splitted = message.content.strip()[
+                len(self.prefix):].split(" ")
+
+            if len(content_splitted) == 0:
+                return
+
+            command_name = content_splitted[0]
+            metadata, command = self.get(
+                lambda m: m.get("name") == command_name)
+
+            if command is None:
+                return
+            if message.guild_id is None and metadata["guild_only"]:
+                return
+
+            await command(message)
+            return
+
+        client.events.append(
+            ("message_create", wrapper)
+        )
