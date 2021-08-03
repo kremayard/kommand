@@ -15,7 +15,7 @@ Run `unikorn add kremayard kommand` and you are ready to go!
 from unikorn import kommand, krema
 
 client = krema.Client(intents=0x7fff)
-commands = Kommand(prefix=".") # Prefix for commands.
+commands = kommand.Kommand(prefix=".") # Prefix for commands.
 
 @commands.add(name="hello") # Add a new command.
 async def hellofn(msg):
