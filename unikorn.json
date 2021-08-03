@@ -1,0 +1,13 @@
+{
+    "name": "kommand",
+    "description": "Command framework for Krema.",
+    "tags": [
+        "krema",
+        "command",
+        "discord",
+        "kommand"
+    ],
+    "pipreq": [],
+    "unireq": [],
+    "github": []
+}
